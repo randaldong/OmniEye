@@ -74,6 +74,10 @@ public class GazeInteractor : MonoBehaviour
 		loadImage.fillAmount = 0;
 		_curInteractable.GazeAvtivated(_gazeTime - _curInteractable.timeToActivate);
 		wizardImage.fillAmount = (_gazeTime - _curInteractable.timeToActivate) / _curInteractable.timeToHeatUp;
+		if (_gazeTime > _curInteractable.timeToActivate + _curInteractable.timeToHeatUp)
+		{
+			wizardImage.fillAmount = 0;
+		}
 	}
 
 	private void OnGazeExit()
