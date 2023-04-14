@@ -4,7 +4,7 @@ using UnityEngine.XR.Management;
 public class DetectXR : MonoBehaviour
 {
 	public bool startInVR = true;
-    public GameObject xrOrigin;
+    public GameObject OVRRig;
     public GameObject desktopTester;
 
     void Start()
@@ -43,13 +43,13 @@ public class DetectXR : MonoBehaviour
         
 		void UseDesktop()
 		{
-			xrOrigin.SetActive(false);
+			OVRRig.SetActive(false);
 			desktopTester.SetActive(true);
 		}
 
 		void UseXR()
 		{
-			xrOrigin.SetActive(true);
+			OVRRig.SetActive(true);
 			desktopTester.SetActive(false);
 		}
 	}

@@ -5,23 +5,32 @@ using UnityEngine;
 
 public class GazeInteractable : MonoBehaviour
 {
-	[Header("General Settings", order = 0)]
+	[Header("Selection Settings", order = 0)]
 	[SerializeField] private Color selectionOutlineColor = new Color(0.5f, 0.5f, 1.0f);
 	[SerializeField] private float selectionOutlineWidth = 6.0f;
 	public float timeToActivate = 1.5f;
 	[SerializeField] private float resumeDelay;
 
-	[Header("HeatUp Settings", order = 0)]
-	public bool heatUpSelected = true;
+	[Header("HeatUp Settings", order = 1)]
+	public bool heatUpSelected = false;
 	public float timeToHeatUp = 3.0f;
 	[SerializeField] private Material lavaMaterial;
 
+	[Header("Lazy Follow Settings", order = 2)]
+	public bool lazyFollowSelected = false;
 
 
 	private Material originalMaterial;
-	public void GazeEnter()
+	private Vector3 originalPosition;
+	private GameObject attachToObject;
+	private float attachDistance;
+
+	public void GazeEnter(GameObject targetObject)
 	{
 		originalMaterial = new Material(gameObject.GetComponent<MeshRenderer>().material);
+		originalPosition = gameObject.transform.position;
+		attachToObject = targetObject;
+		attachDistance = Vector3.Distance(targetObject.transform.position, originalPosition);
 
 		if (gameObject.GetComponent<Outline>() != null)
 		{
@@ -38,16 +47,18 @@ public class GazeInteractable : MonoBehaviour
 
 	public void GazeAvtivated(float activateTime)
 	{
-		HeatUp(heatUpSelected, activateTime);
+		HeatUp(activateTime);
+		LazyFollow();
 	}
 
 	public void GazeExit()
 	{
 		gameObject.GetComponent<MeshRenderer>().material = originalMaterial;
 		gameObject.GetComponent<Outline>().enabled = false;
+		transform.position = originalPosition;
 	}
 
-	private void HeatUp(bool heatUpSelected, float activateTime)
+	private void HeatUp(float activateTime)
 	{
 		if (heatUpSelected)
 		{
@@ -61,6 +72,16 @@ public class GazeInteractable : MonoBehaviour
 			}
 		}
 	}
+
+	private void LazyFollow()
+	{
+		if (lazyFollowSelected)
+		{
+			gameObject.GetComponent<Rigidbody>().useGravity = false;
+			transform.position = attachToObject.transform.position + attachToObject.transform.forward * attachDistance;
+		}
+	}
+
 }
 
 

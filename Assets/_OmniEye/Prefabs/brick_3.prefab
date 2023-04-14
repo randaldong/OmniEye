@@ -127,9 +127,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16dbdecb5dc58834dad6af12cc3ca481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isBrick: 0
+  isSelector: 0
+  isTeleportStation: 0
   selectionOutlineColor: {r: 0.5, g: 0.5, b: 1, a: 1}
   selectionOutlineWidth: 6
   timeToActivate: 1
   resumeDelay: 0
-  heatUpSelected: 1
+  heatUpSelected: 0
+  timeToHeatUp: 3
   lavaMaterial: {fileID: 2100000, guid: 976b31720675c1a47be763ebf89dc566, type: 2}
+  lazyFollowSelected: 0

@@ -131,6 +131,7 @@ MonoBehaviour:
   selectionOutlineWidth: 6
   timeToActivate: 1.5
   resumeDelay: 0
-  heatUpSelected: 1
+  heatUpSelected: 0
   timeToHeatUp: 3
   lavaMaterial: {fileID: 2100000, guid: 976b31720675c1a47be763ebf89dc566, type: 2}
+  lazyFollowSelected: 0
