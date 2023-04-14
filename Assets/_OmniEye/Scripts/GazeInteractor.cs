@@ -3,32 +3,32 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GazeInteractor : MonoBehaviour
 {
-	[Header("Custom Settings")]
-	public GameObject gazeReticleGameObject;
-	public float timeToActivate = 2.0f;
-	public bool showRay = true;
-	public GameObject gazeReticle;
-
+	[Header("Ray Settings")]
+	[SerializeField] private bool showDebugRay = true;
 	[SerializeField] private float _maxDetectionDistance = 10.0f;
 	[SerializeField] private float _minDetectionDistance = 0.1f;
 	[SerializeField] private LayerMask _gazeInteractableLayer;
 
+	[Header("Reticle Settings")]
+	[SerializeField] GameObject gazeAim;
+	[SerializeField] Image loadImage;
+	[SerializeField] Image wizardImage;
 
 	private Ray _ray;
 	private RaycastHit _hitInfo;
 	private GazeInteractable _curInteractable, _prevInteractable;
 	private float _gazeTime = 0;
-	private bool _gazeHasBeenActivated = false;
 
 	private void FixedUpdate()
 	{
 		_ray = new Ray(transform.position, transform.forward);
 		if (Physics.Raycast(_ray, out _hitInfo, _maxDetectionDistance, _gazeInteractableLayer))
 		{
-			SetRayDisplay(showRay, _minDetectionDistance, _ray, _hitInfo.distance, new Color(0.9f, 0.5f, 1.0f, 0.8f));
+			SetRayDisplay(showDebugRay, _minDetectionDistance, _ray, _hitInfo.distance, new Color(0.9f, 0.5f, 1.0f, 0.8f));
 			//Debug.Log("Casted ray hits: " + _hitInfo.transform.name);
 			_curInteractable = _hitInfo.transform.GetComponent<GazeInteractable>();
 			if (_curInteractable != null && _curInteractable != _prevInteractable) // gaze enter
@@ -43,16 +43,17 @@ public class GazeInteractor : MonoBehaviour
 			else if (_curInteractable != null && _curInteractable == _prevInteractable) // keep gazing
 			{
 				_gazeTime += Time.fixedDeltaTime;
-				if (_gazeTime >= timeToActivate && _gazeHasBeenActivated == false)
+				loadImage.fillAmount = _gazeTime / _curInteractable.timeToActivate;
+
+				if (_gazeTime >= _curInteractable.timeToActivate)
 				{
-					_curInteractable.GazeAvtivated();
-					_gazeHasBeenActivated = true;
+					OnGazeActivated();
 				}
 			}
 		}
 		else
 		{
-			SetRayDisplay(showRay, _minDetectionDistance, _ray, _maxDetectionDistance, new Color(0.5f, 0.5f, 1.0f, 0.5f));
+			SetRayDisplay(showDebugRay, _minDetectionDistance, _ray, _maxDetectionDistance, new Color(0.5f, 0.5f, 1.0f, 0.5f));
 			if (_prevInteractable != null)
 			{
 				OnGazeExit();
@@ -68,11 +69,19 @@ public class GazeInteractor : MonoBehaviour
 		}
 	}
 
+	private void OnGazeActivated()
+	{
+		loadImage.fillAmount = 0;
+		_curInteractable.GazeAvtivated(_gazeTime - _curInteractable.timeToActivate);
+		wizardImage.fillAmount = (_gazeTime - _curInteractable.timeToActivate) / _curInteractable.timeToHeatUp;
+	}
+
 	private void OnGazeExit()
 	{
 		_prevInteractable.GazeExit();
 		_prevInteractable = null;
 		_gazeTime = 0;
-		_gazeHasBeenActivated = false;
+		loadImage.fillAmount = 0f;
+		wizardImage.fillAmount = 0f;
 	}
 }

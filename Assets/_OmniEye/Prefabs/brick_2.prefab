@@ -129,7 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectionOutlineColor: {r: 0.5, g: 0.5, b: 1, a: 1}
   selectionOutlineWidth: 6
-  _resumeDelay: 0
+  timeToActivate: 1
+  resumeDelay: 0
   heatUpSelected: 1
-  heatUpSpeed: 0.01
-  lavaMaterial: {fileID: 2100000, guid: 196a83e4fac7a644ebc189706f6c2082, type: 2}
+  lavaMaterial: {fileID: 2100000, guid: 976b31720675c1a47be763ebf89dc566, type: 2}
