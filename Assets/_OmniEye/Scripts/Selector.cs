@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Selector : MonoBehaviour
@@ -8,16 +6,30 @@ public class Selector : MonoBehaviour
 	public bool isLazyFollowSelector;
 	public float timeToActivate = 3f;
 
+	private GameObject LaserPrompt;
+	private GameObject LaserSelected;
+	private GameObject LazyPrompt;
+	private GameObject LazySelected;
+
 	public void OnSelectorEnter()
 	{
-		SetTextAsPrompt(true);
+
 	}
-	public void SelectorAvtivated(out bool heatUpSelected, out bool lazyFollowSelected)
+	public void SelectorAvtivated(out bool heatUpSelected, out bool lazyFollowSelected, Selector prevActivatedSelector)
 	{
-		SetTextAsPrompt(false);
 		heatUpSelected = isLaserEyeSelector;
 		lazyFollowSelected = isLazyFollowSelector;
-		Debug.Log(heatUpSelected);
+
+		LaserPrompt = GetChildByName(gameObject, "LaserPrompt");
+		LaserSelected = GetChildByName(gameObject, "LaserSelected");
+		LazyPrompt = GetChildByName(gameObject, "LazyPrompt");
+		LazySelected = GetChildByName(gameObject, "LazySelected");
+
+		gameObject.GetComponent<Selector>().SetTextAsSelected();
+		if (prevActivatedSelector != null && prevActivatedSelector != gameObject.GetComponent<Selector>())
+		{
+			prevActivatedSelector.SetTextAsPrompt();
+		}
 	}
 
 	public void SelectorExit()
@@ -25,23 +37,31 @@ public class Selector : MonoBehaviour
 
 	}
 
-	private void SetTextAsPrompt(bool isPrompt)
+	private void SetTextAsPrompt()
 	{
 		if (isLaserEyeSelector)
 		{
-			GameObject LaserPrompt = GetChildByName(gameObject, "LaserPrompt");
-			LaserPrompt.SetActive(isPrompt);
-
-			GameObject LaserSelected = GetChildByName(gameObject, "LaserSelected");
-			LaserSelected.SetActive(!isPrompt);
+			LaserPrompt.SetActive(true);
+			LaserSelected.SetActive(false);
 		}
-		else if(isLazyFollowSelector)
+		else if (isLazyFollowSelector)
 		{
-			GameObject LazyPrompt = GetChildByName(gameObject, "LazyPrompt");
-			LazyPrompt.SetActive(isPrompt);
+			LazyPrompt.SetActive(true);
+			LazySelected.SetActive(false);
+		}
+	}
 
-			GameObject LazySelected = GetChildByName(gameObject, "LazySelected");
-			LazySelected.SetActive(!isPrompt);
+	private void SetTextAsSelected()
+	{
+		if (isLaserEyeSelector)
+		{
+			LaserPrompt.SetActive(false);
+			LaserSelected.SetActive(true);
+		}
+		else if (isLazyFollowSelector)
+		{
+			LazyPrompt.SetActive(false);
+			LazySelected.SetActive(true);
 		}
 	}
 

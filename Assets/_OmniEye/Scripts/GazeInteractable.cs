@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GazeInteractable : MonoBehaviour
@@ -18,19 +15,15 @@ public class GazeInteractable : MonoBehaviour
 
 	[Header("Lazy Follow Settings", order = 2)]
 	public bool lazyFollowSelected = false;
+	[Tooltip("The distance to where the object finally stays : the distance to the object's original position")]
+	public float lazyFollowDistanceRatio = 1.0f;
 
 
 	private Material originalMaterial;
-	private Vector3 originalPosition;
-	private GameObject attachToObject;
-	private float attachDistance;
 
-	public void GazeEnter(GameObject targetObject)
+	public void GazeEnter()
 	{
 		originalMaterial = new Material(gameObject.GetComponent<MeshRenderer>().material);
-		originalPosition = gameObject.transform.position;
-		attachToObject = targetObject;
-		attachDistance = Vector3.Distance(targetObject.transform.position, originalPosition);
 
 		if (gameObject.GetComponent<Outline>() != null)
 		{
@@ -45,17 +38,16 @@ public class GazeInteractable : MonoBehaviour
 		}
 	}
 
-	public void GazeAvtivated(float activateTime)
+	public void GazeAvtivated(float activateTime, Vector3 attachPos, Quaternion attachOrient)
 	{
 		HeatUp(activateTime);
-		LazyFollow();
+		LazyFollow(attachPos, attachOrient);
 	}
 
 	public void GazeExit()
 	{
 		gameObject.GetComponent<MeshRenderer>().material = originalMaterial;
 		gameObject.GetComponent<Outline>().enabled = false;
-		transform.position = originalPosition;
 	}
 
 	private void HeatUp(float activateTime)
@@ -73,12 +65,14 @@ public class GazeInteractable : MonoBehaviour
 		}
 	}
 
-	private void LazyFollow()
+	private void LazyFollow(Vector3 attachPos, Quaternion attachOrient)
 	{
 		if (lazyFollowSelected)
 		{
-			gameObject.GetComponent<Rigidbody>().useGravity = false;
-			transform.position = attachToObject.transform.position + attachToObject.transform.forward * attachDistance;
+			gameObject.GetComponent<Rigidbody>().isKinematic = true;
+			gameObject.GetComponent<Rigidbody>().detectCollisions = true;
+			transform.position = attachPos;
+			transform.rotation = attachOrient;
 		}
 	}
 

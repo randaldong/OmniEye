@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,13 +25,17 @@ public class GazeInteractor : MonoBehaviour
 	private RaycastHit _hitBrickInfo, _hitPortalInfo, _hitSelectorInfo;
 	private GazeInteractable _curInteractable, _prevInteractable;
 	private Portal _curPortal, _prevPortal;
-	private Selector _curSelector, _prevSelector;
+	private Selector _curSelector, _prevSelector, _prevActivatedSelector;
 	private float _gazeTime = 0;
 	private float _portalTime = 0;
 	private float _selectorTime = 0;
 	private bool heatUpSelected;
 	private bool lazyFollowSelected;
 
+	private Quaternion attachOrient;
+	private float distance = 0;
+	private Vector3 attachPos;
+	
 	private void FixedUpdate()
 	{
 		_ray = new Ray(transform.position, transform.forward);
@@ -51,7 +51,7 @@ public class GazeInteractor : MonoBehaviour
 				//Debug.Log(_hitInfo.transform.gameObject.name);
 				_curInteractable.heatUpSelected = heatUpSelected;
 				_curInteractable.lazyFollowSelected = lazyFollowSelected;
-				_curInteractable.GazeEnter(gameObject);
+				_curInteractable.GazeEnter();
 				if (_prevInteractable != null) {
 					OnGazeExit();
 				}
@@ -60,10 +60,18 @@ public class GazeInteractor : MonoBehaviour
 			else if (_curInteractable != null && _curInteractable == _prevInteractable) // keep gazing
 			{
 				_gazeTime += Time.deltaTime;
-				gazeLoadImage.fillAmount = _gazeTime / _curInteractable.timeToActivate;
+				if (heatUpSelected || lazyFollowSelected)
+				{
+					gazeLoadImage.fillAmount = _gazeTime / _curInteractable.timeToActivate;
+				}
 
 				if (_gazeTime >= _curInteractable.timeToActivate)
 				{
+					if (distance == 0)
+					{
+						distance = _hitBrickInfo.distance;
+						attachOrient = _curInteractable.transform.rotation;
+					}
 					OnGazeActivated();
 				}
 			}
@@ -117,7 +125,7 @@ public class GazeInteractor : MonoBehaviour
 			if (_curSelector != null && _curSelector != _prevSelector) // upon select
 			{
 				_curSelector.OnSelectorEnter();
-				if (_prevSelector != null)
+				if (_prevSelector != null)  
 				{
 					OnSelectorExit();
 				}
@@ -131,6 +139,10 @@ public class GazeInteractor : MonoBehaviour
 				if (_selectorTime >= _curSelector.timeToActivate)
 				{
 					OnSelectorActivated();
+					if (_prevActivatedSelector != _curSelector)
+					{
+						_prevActivatedSelector = _curSelector;
+					}
 				}
 			}
 
@@ -155,10 +167,18 @@ public class GazeInteractor : MonoBehaviour
 
 	private void OnGazeActivated()
 	{
+		
 		_curInteractable.heatUpSelected = heatUpSelected;
 		_curInteractable.lazyFollowSelected= lazyFollowSelected;
 		gazeLoadImage.fillAmount = 0;
-		_curInteractable.GazeAvtivated(_gazeTime - _curInteractable.timeToActivate);
+
+		if (lazyFollowSelected)
+		{
+			attachPos = transform.position + distance * transform.forward;
+		}
+		Debug.Log(attachPos);
+		_curInteractable.GazeAvtivated(_gazeTime - _curInteractable.timeToActivate, attachPos, attachOrient);
+
 		if (heatUpSelected)
 		{
 			gazeWizardImage.fillAmount = (_gazeTime - _curInteractable.timeToActivate) / _curInteractable.timeToHeatUp;
@@ -203,7 +223,7 @@ public class GazeInteractor : MonoBehaviour
 	private void OnSelectorActivated()
 	{
 		selectorActivateImage.fillAmount = 0;
-		_curSelector.SelectorAvtivated(out heatUpSelected, out lazyFollowSelected);
+		_curSelector.SelectorAvtivated(out heatUpSelected, out lazyFollowSelected, _prevActivatedSelector);
 	}
 
 	private void OnSelectorExit()
